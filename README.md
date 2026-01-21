@@ -62,9 +62,10 @@ A detailed architecture explanation is available in [`ARCHITECTURE.md`](./ARCHIT
 ## How to Run Locally
 
 ### 1. Clone the repository
-```bash
+```
 git clone https://github.com/Ananya-Jaiswal/collaborative-canvas.git
 cd collaborative-canvas
+```
 2. Install dependencies
 npm install
 3. Start the server
