@@ -10,11 +10,13 @@ app.use(cors());
 // =======================
 // SERVE FRONTEND
 // =======================
-app.use(express.static(path.join(__dirname, "../client")));
+const CLIENT_PATH = path.join(__dirname, "../client");
+app.use(express.static(CLIENT_PATH));
 
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "../client/index.html"));
+app.get("*", (_, res) => {
+  res.sendFile(path.join(CLIENT_PATH, "index.html"));
 });
+
 
 // =======================
 // SERVER + SOCKET.IO
