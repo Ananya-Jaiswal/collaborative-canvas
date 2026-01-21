@@ -85,6 +85,7 @@ Open the URL in multiple tabs or devices to test collaboration.
 ---
 
 ## Project Structure
+```
 collaborative-canvas/
 │
 ├── client/
@@ -99,30 +100,30 @@ collaborative-canvas/
 ├── package.json
 ├── package-lock.json
 └── README.md
-
+```
 ---
  
 ## Known Limitations
--Deployed using Render Free Tier, so the server may sleep after inactivity.
+- Deployed using Render Free Tier, so the server may sleep after inactivity.
 
--No user authentication (all users are anonymous).
+- No user authentication (all users are anonymous).
 
--In-memory state (resets on server restart).
+- In-memory state (resets on server restart).
 
--These trade-offs were made intentionally for simplicity and clarity.
+- These trade-offs were made intentionally for simplicity and clarity.
 
 ---
 
 ## Future Enhancements
--Persistent storage (database-backed history)
+- Persistent storage (database-backed history)
 
--User authentication and usernames
+- User authentication and usernames
 
--Rooms / multiple canvases
+- Rooms / multiple canvases
 
--Export canvas as image
+- Export canvas as image
 
--Permissions and role-based access
+- Permissions and role-based access
 
 ---
 
