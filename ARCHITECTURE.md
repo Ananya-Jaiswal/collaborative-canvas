@@ -164,3 +164,5 @@ It demonstrates strong understanding of:
 - Conflict resolution
 - Server-authoritative design
 - Event-driven architecture
+
+---
