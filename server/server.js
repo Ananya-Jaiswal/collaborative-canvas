@@ -2,19 +2,30 @@ const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
 const cors = require("cors");
+const path = require("path");
 
 const app = express();
 app.use(cors());
 
-const server = http.createServer(app);
-
-const path = require("path");
-
-// Serve static frontend
+// =======================
+// SERVE FRONTEND
+// =======================
 app.use(express.static(path.join(__dirname, "../client")));
 
-app.get("*", (req, res) => {
+app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "../client/index.html"));
+});
+
+// =======================
+// SERVER + SOCKET.IO
+// =======================
+const server = http.createServer(app);
+
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
 });
 
 // =======================
@@ -24,18 +35,19 @@ const history = [];
 const redoStack = [];
 
 // =======================
-// SOCKET.IO
+// SOCKET LOGIC
 // =======================
-const io = new Server(server, {
-  cors: { origin: "*", methods: ["GET", "POST"] }
-});
-
 io.on("connection", socket => {
   console.log("User connected:", socket.id);
 
-  // ----- LIVE DRAW STREAM -----
-  socket.on("stroke:start", d => socket.broadcast.emit("stroke:start", d));
-  socket.on("stroke:point", d => socket.broadcast.emit("stroke:point", d));
+  // ----- LIVE DRAW PREVIEW -----
+  socket.on("stroke:start", data => {
+    socket.broadcast.emit("stroke:start", data);
+  });
+
+  socket.on("stroke:point", data => {
+    socket.broadcast.emit("stroke:point", data);
+  });
 
   // ----- COMMIT STROKE -----
   socket.on("stroke:commit", stroke => {
@@ -44,38 +56,14 @@ io.on("connection", socket => {
     io.emit("history:update", history);
   });
 
-  // ----- ERASE (BY STROKE ID) -----
+  // ----- ERASE (SINGLE STROKE) -----
   socket.on("erase:stroke", ({ strokeId }) => {
     history.push({ type: "erase-stroke", data: { strokeId } });
     redoStack.length = 0;
     io.emit("history:update", history);
   });
 
-  // ----- CLEAR -----
-  socket.on("canvas:clear", () => {
-    history.push({ type: "clear" });
-    redoStack.length = 0;
-    io.emit("history:update", history);
-  });
-
-  // ----- UNDO -----
-  socket.on("undo:request", () => {
-    if (!history.length) return;
-    redoStack.push(history.pop());
-    io.emit("history:update", history);
-  });
-
-  // ----- REDO -----
-  socket.on("redo:request", () => {
-    if (!redoStack.length) return;
-    history.push(redoStack.pop());
-    io.emit("history:update", history);
-  });
-
-  socket.on("disconnect", () => {
-    console.log("User disconnected:", socket.id);
-  });
-
+  // ----- ERASE (MULTIPLE STROKES) -----
   socket.on("erase:strokes", ({ strokeIds }) => {
     history.push({
       type: "erase-strokes",
@@ -85,6 +73,7 @@ io.on("connection", socket => {
     io.emit("history:update", history);
   });
 
+  // ----- LIVE ERASE PREVIEW -----
   socket.on("erase:preview", data => {
     socket.broadcast.emit("erase:preview", data);
   });
@@ -93,25 +82,50 @@ io.on("connection", socket => {
     socket.broadcast.emit("erase:preview:end");
   });
 
-  // =======================
-  // CURSOR PRESENCE
-  // =======================
+  // ----- CLEAR CANVAS -----
+  socket.on("canvas:clear", () => {
+    history.push({ type: "clear" });
+    redoStack.length = 0;
+    io.emit("history:update", history);
+  });
+
+  // ----- GLOBAL UNDO -----
+  socket.on("undo:request", () => {
+    if (!history.length) return;
+    redoStack.push(history.pop());
+    io.emit("history:update", history);
+  });
+
+  // ----- GLOBAL REDO -----
+  socket.on("redo:request", () => {
+    if (!redoStack.length) return;
+    history.push(redoStack.pop());
+    io.emit("history:update", history);
+  });
+
+  // ----- CURSOR PRESENCE -----
   socket.on("cursor:move", data => {
     socket.broadcast.emit("cursor:update", {
       socketId: socket.id,
-    x: data.x,
+      x: data.x,
       y: data.y,
       color: data.color
     });
   });
 
+  // ----- DISCONNECT (SINGLE SOURCE) -----
   socket.on("disconnect", () => {
+    console.log("User disconnected:", socket.id);
     socket.broadcast.emit("cursor:leave", {
       socketId: socket.id
     });
   });
 });
 
-server.listen(3000, () =>
-  console.log("Server running at http://localhost:3000")
-);
+// =======================
+// START SERVER (RENDER SAFE)
+// =======================
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
