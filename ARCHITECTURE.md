@@ -30,7 +30,7 @@ Node.js Server (Express + Socket.IO)
 
 ## 3. Client Architecture
 
-# 3.1 Responsibilities
+### 3.1 Responsibilities
 The client is intentionally kept stateless with respect to permanent data.
 Client handles:
 - Rendering strokes on canvas
