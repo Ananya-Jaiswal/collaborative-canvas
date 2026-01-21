@@ -82,7 +82,9 @@ http://localhost:3000
 ```
 Open the URL in multiple tabs or devices to test collaboration.
 
-Project Structure
+---
+
+## Project Structure
 collaborative-canvas/
 │
 ├── client/
@@ -98,44 +100,39 @@ collaborative-canvas/
 ├── package-lock.json
 └── README.md
 
-Known Limitations
-Deployed using Render Free Tier, so the server may sleep after inactivity.
+---
+ 
+## Known Limitations
+-Deployed using Render Free Tier, so the server may sleep after inactivity.
 
-No user authentication (all users are anonymous).
+-No user authentication (all users are anonymous).
 
-In-memory state (resets on server restart).
+-In-memory state (resets on server restart).
 
-These trade-offs were made intentionally for simplicity and clarity.
-
- Future Enhancements
-Persistent storage (database-backed history)
-
-User authentication and usernames
-
-Rooms / multiple canvases
-
-Export canvas as image
-
-Permissions and role-based access
-
- Author
-Ananya Jaiswal
-GitHub: https://github.com/Ananya-Jaiswal
-
- License
-This project is for educational and evaluation purposes.
-
+-These trade-offs were made intentionally for simplicity and clarity.
 
 ---
 
-## What you should do now
+## Future Enhancements
+-Persistent storage (database-backed history)
 
-1. Create `README.md` in your repo root  
-2. Paste the above content  
-3. Commit and push:
+-User authentication and usernames
 
-```
-git add README.md
-git commit -m "Add README with live demo and project details"
-git push
-```
+-Rooms / multiple canvases
+
+-Export canvas as image
+
+-Permissions and role-based access
+
+---
+
+## Author
+Ananya Jaiswal
+GitHub: https://github.com/Ananya-Jaiswal
+
+---
+
+## License
+This project is for educational and evaluation purposes.
+
+---
