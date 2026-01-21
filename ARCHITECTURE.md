@@ -123,7 +123,7 @@ Cursor presence is implemented as a non-persistent real-time feature.
 ---
 
 ## 8. Synchronization Guarantees
-| **Feature** | **Guarantee** |
+| Feature | Guarantee |
 | :--- | :--- |
 | Drawing | Strongly consistent |
 | Erasing | Stroke-accurate |
@@ -144,7 +144,7 @@ The application is deployed on **Render (Free Tier)**.
 ---
 
 ## 10. Design Decisions
-| **Decision** | **Reason** |
+| Decision | Reason |
 | :--- | :--- |
 | Server-authoritative state | Prevents conflicts |
 | Stroke-based erasing | Enables undo/redo |
