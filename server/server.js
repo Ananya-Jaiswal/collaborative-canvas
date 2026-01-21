@@ -7,28 +7,15 @@ const path = require("path");
 const app = express();
 app.use(cors());
 
-// =======================
-// SERVE FRONTEND
-// =======================
-const CLIENT_PATH = path.join(__dirname, "../client");
-app.use(express.static(CLIENT_PATH));
+// Serve static frontend
+app.use(express.static(path.join(__dirname, "../client")));
 
-app.get("*", (_, res) => {
-  res.sendFile(path.join(CLIENT_PATH, "index.html"));
+// IMPORTANT: Express-safe wildcard
+app.get("/*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../client/index.html"));
 });
 
-
-// =======================
-// SERVER + SOCKET.IO
-// =======================
 const server = http.createServer(app);
-
-const io = new Server(server, {
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST"]
-  }
-});
 
 // =======================
 // AUTHORITATIVE STATE
@@ -37,75 +24,54 @@ const history = [];
 const redoStack = [];
 
 // =======================
-// SOCKET LOGIC
+// SOCKET.IO
 // =======================
+const io = new Server(server, {
+  cors: { origin: "*", methods: ["GET", "POST"] }
+});
+
 io.on("connection", socket => {
   console.log("User connected:", socket.id);
 
-  // ----- LIVE DRAW PREVIEW -----
-  socket.on("stroke:start", data => {
-    socket.broadcast.emit("stroke:start", data);
-  });
+  // Live drawing
+  socket.on("stroke:start", d => socket.broadcast.emit("stroke:start", d));
+  socket.on("stroke:point", d => socket.broadcast.emit("stroke:point", d));
 
-  socket.on("stroke:point", data => {
-    socket.broadcast.emit("stroke:point", data);
-  });
-
-  // ----- COMMIT STROKE -----
+  // Commit stroke
   socket.on("stroke:commit", stroke => {
     history.push({ type: "stroke", data: stroke });
     redoStack.length = 0;
     io.emit("history:update", history);
   });
 
-  // ----- ERASE (SINGLE STROKE) -----
-  socket.on("erase:stroke", ({ strokeId }) => {
-    history.push({ type: "erase-stroke", data: { strokeId } });
-    redoStack.length = 0;
-    io.emit("history:update", history);
-  });
-
-  // ----- ERASE (MULTIPLE STROKES) -----
+  // Erase strokes
   socket.on("erase:strokes", ({ strokeIds }) => {
-    history.push({
-      type: "erase-strokes",
-      data: { strokeIds }
-    });
+    history.push({ type: "erase-strokes", data: { strokeIds } });
     redoStack.length = 0;
     io.emit("history:update", history);
   });
 
-  // ----- LIVE ERASE PREVIEW -----
-  socket.on("erase:preview", data => {
-    socket.broadcast.emit("erase:preview", data);
-  });
-
-  socket.on("erase:preview:end", () => {
-    socket.broadcast.emit("erase:preview:end");
-  });
-
-  // ----- CLEAR CANVAS -----
+  // Clear
   socket.on("canvas:clear", () => {
     history.push({ type: "clear" });
     redoStack.length = 0;
     io.emit("history:update", history);
   });
 
-  // ----- GLOBAL UNDO -----
+  // Undo / Redo
   socket.on("undo:request", () => {
     if (!history.length) return;
     redoStack.push(history.pop());
     io.emit("history:update", history);
   });
 
-  // ----- GLOBAL REDO -----
   socket.on("redo:request", () => {
     if (!redoStack.length) return;
     history.push(redoStack.pop());
     io.emit("history:update", history);
   });
 
-  // ----- CURSOR PRESENCE -----
+  // Cursor presence
   socket.on("cursor:move", data => {
     socket.broadcast.emit("cursor:update", {
       socketId: socket.id,
@@ -115,19 +81,16 @@ io.on("connection", socket => {
     });
   });
 
-  // ----- DISCONNECT (SINGLE SOURCE) -----
   socket.on("disconnect", () => {
+    socket.broadcast.emit("cursor:leave", { socketId: socket.id });
     console.log("User disconnected:", socket.id);
-    socket.broadcast.emit("cursor:leave", {
-      socketId: socket.id
-    });
   });
 });
 
 // =======================
-// START SERVER (RENDER SAFE)
+// START SERVER
 // =======================
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+server.listen(PORT, () =>
+  console.log(`Server running on port ${PORT}`)
+);
