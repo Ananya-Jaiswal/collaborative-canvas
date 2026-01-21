@@ -1,15 +1,11 @@
-// =======================
 // CANVAS SETUP
-// =======================
 const drawCanvas = document.getElementById("drawingCanvas");
 const drawCtx = drawCanvas.getContext("2d");
 
 const cursorCanvas = document.getElementById("cursorCanvas");
 const cursorCtx = cursorCanvas.getContext("2d");
 
-// =======================
 // CLIENT STATE (RENDER ONLY)
-// =======================
 let operations = [];              // authoritative history from server
 let currentStroke = null;        // local preview only
 const remoteStrokes = new Map(); // remote preview only
@@ -21,24 +17,20 @@ let toolMode = "draw"; // draw | erase
 let erasing = false;
 let eraserRadius = 10;
 
-// 🔥 IMPORTANT: live erase set (per mouse-down gesture)
+// IMPORTANT: live erase set (per mouse-down gesture)
 let liveErasedIds = new Set();
 
 const remoteLiveErasedIds = new Set(); // live erase from other users
 
 drawCanvas.style.touchAction = "none";
 
-// =======================
 // CURSOR PRESENCE STATE
-// =======================
 const remoteCursors = new Map(); // socketId -> { x, y, color }
 
 const myCursorColor =
   "#" + Math.floor(Math.random() * 16777215).toString(16).padStart(6, "0");
 
-// =======================
 // DOM
-// =======================
 const drawToolBtn = document.getElementById("drawTool");
 const eraseToolBtn = document.getElementById("eraseTool");
 const eraserSizeSelect = document.getElementById("eraserSize");
@@ -48,9 +40,7 @@ const undoBtn = document.getElementById("undoBtn");
 const redoBtn = document.getElementById("redoBtn");
 const clearBtn = document.getElementById("clearBtn");
 
-// =======================
 // UI
-// =======================
 function updateToolbarUI() {
   drawToolBtn.classList.toggle("active", toolMode === "draw");
   eraseToolBtn.classList.toggle("active", toolMode === "erase");
@@ -58,9 +48,7 @@ function updateToolbarUI() {
   eraserSizeSelect.classList.toggle("hidden", toolMode !== "erase");
 }
 
-// =======================
 // HELPERS
-// =======================
 function getPos(e) {
   const r = drawCanvas.getBoundingClientRect();
   return { x: e.clientX - r.left, y: e.clientY - r.top };
@@ -117,9 +105,7 @@ function renderCursors() {
   }
 }
 
-// =======================
 // RENDER (SINGLE SOURCE OF TRUTH)
-// =======================
 function render() {
   drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
 
@@ -140,12 +126,12 @@ function render() {
     }
   }
 
-  // 🔥 Live erase (immediate UX)
+  // Live erase
   for (const id of liveErasedIds) {
     visible.delete(id);
   }
 
-  // 🔥 Remote live erase preview
+  // Remote live erase preview
   for (const id of remoteLiveErasedIds) {
     visible.delete(id);
   }
@@ -160,9 +146,7 @@ function render() {
   if (currentStroke) drawStroke(currentStroke);
 }
 
-// =======================
 // RESIZE
-// =======================
 function resize() {
   drawCanvas.width = cursorCanvas.width = innerWidth;
   drawCanvas.height = cursorCanvas.height = innerHeight;
@@ -172,15 +156,13 @@ function resize() {
 resize();
 addEventListener("resize", resize);
 
-// =======================
 // MOUSE EVENTS
-// =======================
 drawCanvas.onmousedown = e => {
   const { x, y } = getPos(e);
 
   if (toolMode === "erase") {
     erasing = true;
-    liveErasedIds.clear(); // 🔥 start fresh gesture
+    liveErasedIds.clear(); // tart fresh gesture
     return;
   }
 
@@ -211,7 +193,7 @@ drawCanvas.onmousemove = e => {
     drawEraser(x, y);
     if (!erasing) return;
 
-    // 🔥 LIVE ERASE: hide strokes immediately
+    // LIVE ERASE
     for (const op of operations) {
       if (op.type !== "stroke") continue;
 
@@ -344,9 +326,7 @@ drawCanvas.addEventListener("touchend", e => {
 }, { passive: false });
 
 
-// =======================
 // SOCKET — APPLY SERVER HISTORY
-// =======================
 window.socket.on("history:update", serverHistory => {
   operations = serverHistory;
 
@@ -359,9 +339,7 @@ window.socket.on("history:update", serverHistory => {
   renderCursors();
 });
 
-// =======================
 // SOCKET — LIVE REMOTE PREVIEW
-// =======================
 window.socket.on("stroke:start", d => {
   remoteStrokes.set(d.id, {
     id: d.id,
@@ -398,9 +376,7 @@ window.socket.on("cursor:leave", data => {
   renderCursors();
 });
 
-// =======================
 // UI EVENTS
-// =======================
 drawToolBtn.onclick = () => {
   toolMode = "draw";
   updateToolbarUI();

@@ -17,15 +17,11 @@ app.use((req, res) => {
 
 const server = http.createServer(app);
 
-// =======================
 // AUTHORITATIVE STATE
-// =======================
 const history = [];
 const redoStack = [];
 
-// =======================
 // SOCKET.IO
-// =======================
 const io = new Server(server, {
   cors: { origin: "*", methods: ["GET", "POST"] }
 });
@@ -87,9 +83,7 @@ io.on("connection", socket => {
   });
 });
 
-// =======================
 // START SERVER
-// =======================
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () =>
   console.log(`Server running on port ${PORT}`)
