@@ -12,36 +12,40 @@ The Real-Time Collaborative Canvas is built using a client–server architecture
 ---
 
 ## 2. High-Level Architecture
-### Browser (Client)
-↓ WebSocket / HTTP
-
-### Node.js Server (Express + Socket.IO)
-The same server:
-* Serves static frontend files
-* Manages real-time WebSocket communication
-* Maintains the authoritative drawing state
-
+```
+Browser (Client)
+   ├── Canvas Rendering (HTML5 Canvas)
+   ├── User Input (Mouse / Touch)
+   ├── Live Preview Layer
+   └── Socket.IO Client
+            │
+            ▼
+Node.js Server (Express + Socket.IO)
+   ├── Authoritative History Store
+   ├── Undo / Redo Manager
+   ├── Event Broadcaster
+   └── Static File Server
+```
 ---
 
 ## 3. Client Architecture
 
 ### 3.1 Responsibilities
-The client performs render-only logic and does not permanently modify canvas state.
-* Capture mouse and touch input
-* Render strokes from server history
-* Show live drawing previews
-* Detect stroke collisions for erasing
-* Send user actions to the server
-* Display remote user cursors
-
-> **Note:** The client never performs undo/redo locally.
+The client is intentionally kept stateless with respect to permanent data.
+Client handles:
+- Rendering strokes on canvas
+- Capturing mouse / touch input
+- Sending drawing and control events to server
+- Rendering server-approved history
+- Showing live previews (local + remote)
+- Displaying cursor presence
 
 ### 3.2 Canvas Layering
 Two canvas layers are used:
 1.  **drawingCanvas**: Renders all committed strokes from the server history.
 2.  **cursorCanvas**: Renders eraser indicators and remote user cursors.
 
-This separation avoids unnecessary re-drawing of committed strokes and improves performance.
+This separation avoids re-rendering committed content during cursor movement.
 
 ---
 
@@ -74,7 +78,7 @@ Clients replay these operations to render the canvas.
 5.  Server broadcasts updated history
 6.  All clients re-render canvas
 
-### 5.2 Erasing Flow (Stroke-Based)
+### 5.2 Erasing Flow (Stroke-Based Erasing)
 The eraser works by removing entire strokes, not pixels.
 1.  Client detects which strokes intersect the eraser
 2.  Stroke IDs are collected
@@ -97,19 +101,24 @@ Undo and redo are fully server-controlled.
 ---
 
 ## 6. Rendering Strategy
-Rendering is deterministic and history-based:
-1.  Clear canvas
-2.  Replay all operations from server history in order
-3.  Apply erase and clear operations
-4.  Render preview strokes and cursors last
+Clients never apply mutations directly.
+Rendering algorithm:
+1. Clear canvas
+2. Replay server history sequentially
+3. Apply erase / clear operations
+4. Draw previews last
+This guarantees:
+- Deterministic rendering
+- No ghost strokes
+- Perfect recovery on reconnect
 
 ---
 
 ## 7. Cursor Presence
 Cursor presence is implemented as a non-persistent real-time feature.
-* Cursor movements are broadcast live
-* Cursor data is not stored in history
-* Cursor disappears when user disconnects
+- Cursor movements are broadcast live
+- Cursor data is not stored in history
+- Cursor disappears when user disconnects
 
 ---
 
@@ -119,16 +128,16 @@ Cursor presence is implemented as a non-persistent real-time feature.
 | Drawing | Strongly consistent |
 | Erasing | Stroke-accurate |
 | Clear | Global and immediate |
-| Undo/Redo | Deterministic and server-authoritative |
+| Undo/Redo | Deterministic and server-controlled |
 | Cursor presence | Best-effort real-time |
 
 ---
 
 ## 9. Deployment Architecture
 The application is deployed on **Render (Free Tier)**.
-* Express serves static frontend files
-* Socket.IO runs on the same server
-* HTTP and WebSocket share a single origin
+- Express serves static frontend files
+- Socket.IO runs on the same server
+- HTTP and WebSocket share a single origin
 
 *Note: Cold starts may occur on inactivity due to free tier limitations.*
 
@@ -146,14 +155,27 @@ The application is deployed on **Render (Free Tier)**.
 ---
 
 ## 11. Known Limitations
-* Canvas state is lost on server restart
-* No authentication or rooms
-* No persistent database
-* Free-tier Render cold starts
+- Canvas state is lost on server restart
+- No authentication or rooms
+- No persistent database
+- Free-tier Render cold starts
 
 ---
 
-## 12. Conclusion
+## 12. Scalability Considerations
+Current design is optimized for:
+-Small to medium collaborative groups
+-Short-lived sessions (assessment scope)
+
+Future improvements:
+-Room-based isolation
+-History chunking
+-Snapshot compression
+-Redis-backed state
+
+---
+
+## 13. Conclusion
 This architecture prioritizes:
 - Correctness over complexity
 - Consistency over shortcuts
