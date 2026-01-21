@@ -13,15 +13,15 @@ https://collaborative-canvas-9e2d.onrender.com/
 
 ## Features
 
-- 🖌️ **Real-time collaborative drawing**
-- 👥 **Multi-user sync across tabs and devices**
-- 🧽 **Live stroke-based erasing (globally synced)**
-- ↩️ **Global Undo / Redo (server-authoritative)**
-- 🧹 **Global canvas clear**
-- 🖱️ **Live cursor presence for each user**
-- 📱 **Mobile touch support**
-- 🔄 **State consistency across reconnects**
-- ⚙️ **Server-authoritative history model**
+-  **Real-time collaborative drawing**
+-  **Multi-user sync across tabs and devices**
+-  **Live stroke-based erasing (globally synced)**
+-  **Global Undo / Redo (server-authoritative)**
+-  **Global canvas clear**
+-  **Live cursor presence for each user**
+-  **Mobile touch support**
+-  **State consistency across reconnects**
+-  **Server-authoritative history model**
 
 ---
 
