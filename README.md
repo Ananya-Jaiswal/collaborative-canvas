@@ -61,16 +61,18 @@ A detailed architecture explanation is available in [`ARCHITECTURE.md`](./ARCHIT
 
 ## How to Run Locally
 
-### 1. Clone the repository
+# 1. Clone the repository
 ```
 git clone https://github.com/Ananya-Jaiswal/collaborative-canvas.git
 cd collaborative-canvas
 ```
-2. Install dependencies
+# 2. Install dependencies
 npm install
-3. Start the server
+
+# 3. Start the server
 npm start
-4. Open in browser
+
+# 4. Open in browser
 http://localhost:3000
 Open the URL in multiple tabs or devices to test collaboration.
 
@@ -89,7 +91,8 @@ collaborative-canvas/
 ├── package.json
 ├── package-lock.json
 └── README.md
- Known Limitations
+
+Known Limitations
 Deployed using Render Free Tier, so the server may sleep after inactivity.
 
 No user authentication (all users are anonymous).
@@ -121,9 +124,9 @@ This project is for educational and evaluation purposes.
 
 ## What you should do now
 
-1️⃣ Create `README.md` in your repo root  
-2️⃣ Paste the above content  
-3️⃣ Commit and push:
+1. Create `README.md` in your repo root  
+2. Paste the above content  
+3. Commit and push:
 
 ```bash
 git add README.md
