@@ -30,7 +30,7 @@ Node.js Server (Express + Socket.IO)
 
 ## 3. Client Architecture
 
-### 3.1 Responsibilities
+# 3.1 Responsibilities
 The client is intentionally kept stateless with respect to permanent data.
 Client handles:
 - Rendering strokes on canvas
@@ -123,7 +123,7 @@ Cursor presence is implemented as a non-persistent real-time feature.
 ---
 
 ## 8. Synchronization Guarantees
-| Feature | Guarantee |
+| **Feature** | **Guarantee** |
 | :--- | :--- |
 | Drawing | Strongly consistent |
 | Erasing | Stroke-accurate |
@@ -144,7 +144,7 @@ The application is deployed on **Render (Free Tier)**.
 ---
 
 ## 10. Design Decisions
-| Decision | Reason |
+| **Decision** | **Reason** |
 | :--- | :--- |
 | Server-authoritative state | Prevents conflicts |
 | Stroke-based erasing | Enables undo/redo |
