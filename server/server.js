@@ -11,7 +11,7 @@ app.use(cors());
 app.use(express.static(path.join(__dirname, "../client")));
 
 // IMPORTANT: Express-safe wildcard
-app.get("/*", (req, res) => {
+app.use((req, res) => {
   res.sendFile(path.join(__dirname, "../client/index.html"));
 });
 
